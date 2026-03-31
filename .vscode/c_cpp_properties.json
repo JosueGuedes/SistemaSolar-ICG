@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\MinGW\\lib\\freeglut\\include"
+                "C:/MinGW/lib/freeglut/include"
             ],
             "defines": [
                 "_DEBUG",
