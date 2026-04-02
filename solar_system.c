@@ -15,6 +15,17 @@ typedef struct {
     float x, y, z;
 } Vec3;
 
+typedef struct {
+    Vec3* orbita;
+    int nOrbita;
+    char* nome;
+
+    float r, g, b;
+    float t, scale, velocidade;
+} Planeta;
+
+Planeta planetas[8];
+
 Vec3 catmullRom(Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3, float t) {
     float t2 = t * t;
     float t3 = t2 * t;
@@ -133,9 +144,203 @@ Vec3 orbitaSaturno[] = {
 };
 int nOrbitaSaturno = 8;
 
+Vec3 orbitaUrano[] = {
+    {24, 0, 0},
+    {12, 0, 10},
+    {0, 0, 14},
+    {-12, 0, 10},
+    {-24, 0, 0},
+    {-12, 0, -10},
+    {0, 0, -14},
+    {12, 0, -10}
+};
+int nOrbitaUrano = 8;
+
+Vec3 orbitaNetuno[] = {
+    {28, 0, 0},
+    {14, 0, 12},
+    {0, 0, 16},
+    {-14, 0, 12},
+    {-28, 0, 0},
+    {-14, 0, -12},
+    {0, 0, -16},
+    {14, 0, -12}
+};
+int nOrbitaNetuno = 8;
+
+void initPlanets(){
+
+    // Mercurio
+    Planeta mercurio;
+    mercurio.nome = "Mercurio";
+    mercurio.orbita = orbitaMercurio;
+    mercurio.nOrbita = norbitaMercurio;
+    mercurio.r = 0.7;
+    mercurio.g = 0.47;
+    mercurio.b = 0.2;
+    mercurio.scale = 1.0f;
+    mercurio.t = t1;
+    mercurio.velocidade = 0.003f;
+
+    // Venus
+    Planeta venus;
+    venus.nome = "Venus";
+    venus.orbita = orbitaVenus;
+    venus.nOrbita = norbitaVenus;
+    venus.r = 1;
+    venus.g = 0;
+    venus.b = 0;
+    venus.scale = 0.5;
+    venus.t = t2;
+    venus.velocidade = 0.002f;
+
+    // Terra
+    Planeta terra;
+    terra.nome = "Terra";
+    terra.orbita = orbitaTerra;
+    terra.nOrbita = nOrbitaTerra;
+    terra.r = 0.2;
+    terra.g = 0.5;
+    terra.b = 1.0;
+    terra.scale = 0.6;
+    terra.t = t3;
+    terra.velocidade = 0.0015f;
+
+    // Marte
+    Planeta marte;
+    marte.nome = "Marte";
+    marte.orbita = orbitaMarte;
+    marte.nOrbita = nOrbitaMarte;
+    marte.r = 0.8;
+    marte.g = 0.3;
+    marte.b = 0.3;
+    marte.scale = 0.45;
+    marte.t = t4;
+    marte.velocidade = 0.0012f;
+
+    // jupiter
+    Planeta jupiter;
+    jupiter.nome = "Jupiter";
+    jupiter.orbita = orbitaJupiter;
+    jupiter.nOrbita = nOrbitaJupiter;
+    jupiter.r = 0.8;
+    jupiter.g = 0.5;
+    jupiter.b = 0.5;
+    jupiter.scale = 0.9;
+    jupiter.t = t5;
+    jupiter.velocidade =  0.0008f;
+
+    // Saturno
+    Planeta saturno;
+    saturno.nome = "Saturno";
+    saturno.orbita = orbitaSaturno;
+    saturno.nOrbita = nOrbitaSaturno;
+    saturno.r = 0.6;
+    saturno.g = 0.5;
+    saturno.b = 0.5;
+    saturno.scale = 0.9;
+    saturno.t = t6;
+    saturno.velocidade = 0.0006f;
+
+    // Urano
+    Planeta urano;
+    urano.nome = "Urano";
+    urano.orbita = orbitaUrano;
+    urano.nOrbita = nOrbitaUrano;
+    urano.r = 0.0;
+    urano.g = 0.4;
+    urano.b = 0.8;
+    urano.scale = 0.8;
+    urano.t = t7;
+    urano.velocidade = 0.0004f;
+
+    // Netuno
+    Planeta netuno;
+    netuno.nome = "Netuno";
+    netuno.orbita = orbitaNetuno;
+    netuno.nOrbita = nOrbitaNetuno;
+    netuno.r = 0.0;
+    netuno.g = 0.4;
+    netuno.b = 0.95;
+    netuno.scale = 0.7;
+    netuno.t = t8;
+    netuno.velocidade = 0.0003f;
+
+    // Adicionando a variavel global
+    planetas[0] = mercurio;
+    planetas[1] = venus;
+    planetas[2] = terra;
+    planetas[3] = marte;
+    planetas[4] = jupiter;
+    planetas[5] = saturno;
+    planetas[6] = urano;
+    planetas[7] = netuno;
+
+}
+
+void drawText(float x, float y, const char* text) {
+    glRasterPos2f(x, y);
+
+    for (const char* c = text; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);
+    }
+}
+
+void drawLabel3D(Vec3 pos, const char* nome) {
+    GLdouble model[16], proj[16];
+    GLint view[4];
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, model);
+    glGetDoublev(GL_PROJECTION_MATRIX, proj);
+    glGetIntegerv(GL_VIEWPORT, view);
+
+    GLdouble sx, sy, sz;
+
+    gluProject(pos.x, pos.y, pos.z,
+               model, proj, view,
+               &sx, &sy, &sz);
+
+    // Converter para coordenada OpenGL (-1 a 1)
+    float x = (sx / view[2]) * 2.0f - 1.0f;
+    float y = (sy / view[3]) * 2.0f - 1.0f;
+
+    // Mudar para modo 2D
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(-1, 1, -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glColor3f(1, 1, 1);
+    drawText(x, y + 0.05f, nome);
+
+    // Restaurar
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void renderPlanet(Planeta planet){
+    Vec3 pos1 = getSplinePoint(planet.orbita, planet.nOrbita, planet.t);
+
+   glPushMatrix();
+      glTranslatef(pos1.x, pos1.y, pos1.z);
+      glColor3f (planet.r, planet.b, planet.g);
+      glScalef (planet.scale, planet.scale, planet.scale);
+      glutSolidSphere (1.0, 16, 16);
+   glPopMatrix();
+
+   drawLabel3D(pos1, planet.nome);
+}
+
 void init(void) 
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
+   initPlanets();
    glShadeModel (GL_FLAT);
    glEnable(GL_DEPTH_TEST);
 }
@@ -154,66 +359,8 @@ void display(void)
       glutSolidSphere (1.0, 16, 16);
    glPopMatrix();
 
-   // Primeiro astro - Mercurio
-   Vec3 pos1 = getSplinePoint(orbitaMercurio, norbitaMercurio, t1);
-
-   glPushMatrix();
-      glTranslatef(pos1.x, pos1.y, pos1.z);
-      glColor3f (0.7, 0.47, 0.2);
-      glScalef (0.5, 0.5, 0.5);
-      glutSolidSphere (1.0, 16, 16);
-   glPopMatrix();
-
-   // Segundo astro = venus
-   Vec3 pos2 = getSplinePoint(orbitaVenus, norbitaVenus, t2);
-
-   glPushMatrix();
-      glTranslatef(pos2.x, pos2.y, pos2.z);
-      glColor3f (0.0, 1.0, 0.0);
-      glScalef (0.5, 0.5, 0.5);
-      glutSolidSphere (1.0, 16, 16);
-   glPopMatrix();
-
-   // Terceiro astro - Terra
-   Vec3 posTerra = getSplinePoint(orbitaTerra, nOrbitaTerra, t3);
-
-   glPushMatrix();
-      glTranslatef(posTerra.x, posTerra.y, posTerra.z);
-      glColor3f(0.2, 0.5, 1.0);
-      glScalef(0.6, 0.6, 0.6);
-      glutSolidSphere(1.0, 16, 16);
-   glPopMatrix();
-
-   // Quarto astro - Marte
-   Vec3 posMarte = getSplinePoint(orbitaMarte, nOrbitaMarte, t4);
-
-   glPushMatrix();
-      glTranslatef(posMarte.x, posMarte.y, posMarte.z);
-      glColor3f(0.8, 0.3, 0.3);
-      glScalef(0.45, 0.45, 0.45);
-      glutSolidSphere(1.0, 16, 16);
-   glPopMatrix();
-
-   // Quinto astro - Jupiter
-   Vec3 posJupiter = getSplinePoint(orbitaJupiter, nOrbitaJupiter, t5);
-
-   glPushMatrix();
-      glTranslatef(posJupiter.x, posJupiter.y, posJupiter.z);
-      glColor3f(0.8, 0.5, 0.5);
-      glScalef(0.9, 0.9, 0.9);
-      glutSolidSphere(1.0, 16, 16);
-   glPopMatrix();
-
-   // Sexto astro - Saturno
-   Vec3 posSaturno = getSplinePoint(orbitaSaturno, nOrbitaSaturno, t6);
-   glPushMatrix();
-      glTranslatef(posSaturno.x, posSaturno.y, posSaturno.z);
-      glColor3f(0.6, 0.5, 0.5);
-      glScalef(0.9, 0.9, 0.9);
-      glutSolidSphere(1.0, 16, 16);
-   glPopMatrix();
-   
-
+   for (int i = 0 ; i < 8 ; i++)
+    renderPlanet(planetas[i]);
    glFlush ();
    glutSwapBuffers();
 }
@@ -248,18 +395,10 @@ void keyboard(unsigned char key, int x, int y)
 
 void update(int valor){
 
-    t1 += 0.003f;
-    t2 += 0.002f;
-    t3 += 0.0015f;
-    t4 += 0.0012f;
-    t5 += 0.0008f;
-    t6 += 0.0006f;
-    t7 += 0.0004f;
-    t8 += 0.0003f;
-   float progressoTempos[8] = {t1, t2, t3, t4, t5, t6, t7, t8};
-
     for (int i = 0 ; i < 8 ; i++){
-      if(progressoTempos[i] >= 1.0f) progressoTempos[i] = 0.0;
+        planetas[i].t += planetas[i].velocidade;
+        if (planetas[i].t >= 1.0f)
+            planetas[i].t = 0;
     }
 
     glutPostRedisplay();
