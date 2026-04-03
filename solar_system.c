@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 GLuint texturaCeu;
+GLuint texturaMercurio;
+GLuint texturaVenus;
+GLuint texturaTerra;
+GLuint texturaMarte;
+GLuint texturaJupiter;
+GLuint texturaSaturno;
+GLuint texturaUrano;
+GLuint texturaNetuno;
+GLuint texturaSol;
+
 // Variaveis para translação de cubos
 static float angulo = 0.0f;
 
@@ -22,6 +32,8 @@ typedef struct {
 
     float r, g, b;
     float t, scale, velocidade;
+    GLuint textura;
+    float rotX, rotY, rotZ;
 } Planeta;
 
 Planeta planetas[8];
@@ -169,7 +181,7 @@ Vec3 orbitaNetuno[] = {
 int nOrbitaNetuno = 8;
 
 void initPlanets(){
-
+    
     // Mercurio
     Planeta mercurio;
     mercurio.nome = "Mercurio";
@@ -266,6 +278,30 @@ void initPlanets(){
     netuno.t = t8;
     netuno.velocidade = 0.0003f;
 
+    //Adicionando Texturas
+    mercurio.textura = 0;
+    venus.textura = 0;
+    terra.textura = 0;
+    marte.textura = 0;
+    jupiter.textura = 0;
+    saturno.textura = 0;
+    urano.textura = 0;
+    netuno.textura = 0; 
+
+    //Rotacoes para ajeitar a textura
+    mercurio.rotX = mercurio.rotY = mercurio.rotZ = 0.0f;
+    venus.rotX    = venus.rotY    = venus.rotZ    = 0.0f;
+    marte.rotX    = marte.rotY    = marte.rotZ    = 0.0f;
+    jupiter.rotY  = jupiter.rotZ  = 0.0f;
+    saturno.rotY  = saturno.rotZ  = 0.0f;
+    urano.rotX    = urano.rotY    = urano.rotZ    = 0.0f;
+    netuno.rotY   = netuno.rotZ   = 0.0f;
+    jupiter.rotX = 90.0f;
+    saturno.rotX = 90.0f;
+    netuno.rotX = 90.0f;
+    terra.rotX = 0.0f;
+    terra.rotY = 90.0f;
+    terra.rotY = 0.0f;
     // Adicionando a variavel global
     planetas[0] = mercurio;
     planetas[1] = venus;
@@ -327,16 +363,35 @@ void drawLabel3D(Vec3 pos, const char* nome) {
 void renderPlanet(Planeta planet){
     Vec3 pos1 = getSplinePoint(planet.orbita, planet.nOrbita, planet.t);
 
-   glPushMatrix();
-      glTranslatef(pos1.x, pos1.y, pos1.z);
-      glColor3f (planet.r, planet.b, planet.g);
-      glScalef (planet.scale, planet.scale, planet.scale);
-      glutSolidSphere (1.0, 16, 16);
-   glPopMatrix();
+    glPushMatrix();
+        glTranslatef(pos1.x, pos1.y, pos1.z);
+        glScalef(planet.scale, planet.scale, planet.scale);
 
-   drawLabel3D(pos1, planet.nome);
+        if (planet.textura != 0) {
+            GLUquadric *quad = gluNewQuadric();
+            gluQuadricTexture(quad, GL_TRUE);
+            gluQuadricNormals(quad, GLU_SMOOTH);
+
+            glRotatef(planet.rotX, 1.0f, 0.0f, 0.0f);
+            glRotatef(planet.rotY, 0.0f, 1.0f, 0.0f);
+            glRotatef(planet.rotZ, 0.0f, 0.0f, 1.0f);
+
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, planet.textura);
+            glColor3f(1.0f, 1.0f, 1.0f);
+
+            gluSphere(quad, 1.0, 30, 30);
+
+            glDisable(GL_TEXTURE_2D);
+            gluDeleteQuadric(quad);
+        } else {
+            glColor3f(planet.r, planet.g, planet.b);
+            glutSolidSphere(1.0, 16, 16);
+        }
+    glPopMatrix();
+
+    drawLabel3D(pos1, planet.nome);
 }
-
 
 GLuint carregarTexturaPPM(const char *filename) {
     FILE *fp = fopen(filename, "rb");
@@ -405,6 +460,25 @@ void drawSkySphere(float raio) {
     gluDeleteQuadric(quad);
 }
 
+void drawSun(float raio) {
+    GLUquadric *quad = gluNewQuadric();
+    gluQuadricTexture(quad, GL_TRUE);
+    gluQuadricNormals(quad, GLU_SMOOTH);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texturaSol);
+
+    glColor3f(1.0f, 1.0f, 1.0f); // importante: branco para não tingir a textura
+
+    glPushMatrix();
+        gluSphere(quad, raio, 50, 50);
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+
+    gluDeleteQuadric(quad);
+}
+
 void init(void) 
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -412,11 +486,38 @@ void init(void)
    glShadeModel (GL_FLAT);
    glEnable(GL_DEPTH_TEST);
 
-   texturaCeu = carregarTexturaPPM("stars.ppm");
+   texturaCeu       = carregarTexturaPPM("stars.ppm");
+   texturaMercurio  = carregarTexturaPPM("mercury.ppm");
+   texturaVenus     = carregarTexturaPPM("venus.ppm");
+   texturaTerra     = carregarTexturaPPM("earth.ppm");
+   texturaMarte     = carregarTexturaPPM("mars.ppm");
+   texturaJupiter   = carregarTexturaPPM("jupiter.ppm");
+   texturaSaturno   = carregarTexturaPPM("saturn.ppm");
+   texturaUrano     = carregarTexturaPPM("uranus.ppm");
+   texturaNetuno    = carregarTexturaPPM("neptune.ppm");
 
-   if (texturaCeu == 0) {
-       printf("Erro ao carregar textura\n");
-   }
+   planetas[0].textura = texturaMercurio;
+   planetas[1].textura = texturaVenus;
+   planetas[2].textura = texturaTerra;
+   planetas[3].textura = texturaMarte;
+   planetas[4].textura = texturaJupiter;
+   planetas[5].textura = texturaSaturno;
+   planetas[6].textura = texturaUrano;
+   planetas[7].textura = texturaNetuno;
+
+   texturaSol = carregarTexturaPPM("sun.ppm");
+
+if (texturaSol == 0) printf("Erro ao carregar sun.ppm\n");
+
+   if (texturaCeu == 0)      printf("Erro ao carregar stars.ppm\n");
+   if (texturaMercurio == 0) printf("Erro ao carregar mercury.ppm\n");
+   if (texturaVenus == 0)    printf("Erro ao carregar venus.ppm\n");
+   if (texturaTerra == 0)    printf("Erro ao carregar earth.ppm\n");
+   if (texturaMarte == 0)    printf("Erro ao carregar mars.ppm\n");
+   if (texturaJupiter == 0)  printf("Erro ao carregar jupiter.ppm\n");
+   if (texturaSaturno == 0)  printf("Erro ao carregar saturn.ppm\n");
+   if (texturaUrano == 0)    printf("Erro ao carregar uranus.ppm\n");
+   if (texturaNetuno == 0)   printf("Erro ao carregar neptune.ppm\n");
 }
 
 void display(void)
@@ -430,9 +531,8 @@ void display(void)
     drawSkySphere(100.0f);
 
    glPushMatrix();
-      glColor3f (1.0, 0.0, 0.0);
-      glScalef (1.0, 1.0, 1.0);      /* modeling transformation */ 
-      glutSolidSphere (1.0, 16, 16);
+   drawSun(1.0f);
+   glPopMatrix();
    glPopMatrix();
 
    for (int i = 0 ; i < 8 ; i++)
