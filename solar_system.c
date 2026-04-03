@@ -1,7 +1,7 @@
-#include <GL/glut.h>
+#include <GLUT/glut.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+GLuint texturaCeu;
 // Variaveis para translação de cubos
 static float angulo = 0.0f;
 
@@ -337,12 +337,86 @@ void renderPlanet(Planeta planet){
    drawLabel3D(pos1, planet.nome);
 }
 
+
+GLuint carregarTexturaPPM(const char *filename) {
+    FILE *fp = fopen(filename, "rb");
+    if (!fp) {
+        printf("Erro ao abrir textura: %s\n", filename);
+        return 0;
+    }
+
+    char format[3];
+    int width, height, maxval;
+
+    fscanf(fp, "%2s", format);
+
+    if (format[0] != 'P' || format[1] != '6') {
+        printf("Formato inválido (use P6)\n");
+        fclose(fp);
+        return 0;
+    }
+
+    fscanf(fp, "%d %d", &width, &height);
+    fscanf(fp, "%d", &maxval);
+    fgetc(fp); // pula \n
+
+    unsigned char *data = (unsigned char *)malloc(3 * width * height);
+    fread(data, 3, width * height, fp);
+    fclose(fp);
+
+    GLuint texID;
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    free(data);
+    return texID;
+}
+
+void drawSkySphere(float raio) {
+    GLUquadric *quad = gluNewQuadric();
+    gluQuadricTexture(quad, GL_TRUE);
+
+    glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texturaCeu);
+
+    glDepthMask(GL_FALSE);
+
+    glPushMatrix();
+        glScalef(-1.0f, 1.0f, 1.0f); // desenha por dentro
+        glColor3f(1.0f, 1.0f, 1.0f);
+        gluSphere(quad, raio, 50, 50);
+    glPopMatrix();
+
+    glDepthMask(GL_TRUE);
+    glPopAttrib();
+
+    gluDeleteQuadric(quad);
+}
+
 void init(void) 
 {
    glClearColor (0.0, 0.0, 0.0, 0.0);
    initPlanets();
    glShadeModel (GL_FLAT);
    glEnable(GL_DEPTH_TEST);
+
+   texturaCeu = carregarTexturaPPM("stars.ppm");
+
+   if (texturaCeu == 0) {
+       printf("Erro ao carregar textura\n");
+   }
 }
 
 void display(void)
@@ -352,6 +426,8 @@ void display(void)
    gluLookAt ( 0.0, 7.0, 30.0,  // lookFrom
                0.0, 0.0, 0.0,  // lookAt
                0.0, 1.0, 0.0); // Up
+
+    drawSkySphere(100.0f);
 
    glPushMatrix();
       glColor3f (1.0, 0.0, 0.0);
@@ -372,7 +448,7 @@ void reshape (int w, int h)
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
 
-   gluPerspective(60.0, (float)w/(float)h, 1.0, 50.0);
+   gluPerspective(60.0, (float)w/(float)h, 1.0, 200.0);
 
    glMatrixMode (GL_MODELVIEW);
 }
@@ -408,7 +484,7 @@ void update(int valor){
 int main(int argc, char** argv)
 {
    glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
    glutInitWindowSize (500, 500); 
    glutInitWindowPosition (100, 100);
    glutCreateWindow (argv[0]);
