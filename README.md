@@ -51,9 +51,11 @@ TBD
 
 ## Possíveis melhorias
 
-Como evolução do projeto, é possível expandir a simulação com a inclusão de satélites naturais, anéis planetários e efeitos de sombra entre os corpos celestes. Melhorias na interface de interação, como suporte ao uso de mouse, e ajustes nas proporções físicas do sistema também podem ser considerados.
+Como evolução do projeto, pretende-se aprimorar a qualidade visual e a fidelidade física da simulação. Entre as melhorias possíveis está a migração do pipeline fixo para o uso de shaders GLSL, permitindo a implementação de sombreamento por pixel (Phong) e maior controle sobre os efeitos de iluminação.
 
-TBD
+Também pode ser incorporado suporte a transparência real baseada em textura com canal alpha, substituindo a abordagem atual baseada apenas em blending global. Outra melhoria relevante seria a implementação de sombras projetadas entre os corpos celestes, utilizando técnicas como shadow mapping.
+
+Adicionalmente, pode-se aprimorar a interação com o usuário por meio de controle de câmera com mouse e navegação mais intuitiva, bem como introduzir escalas físicas mais realistas para distâncias, tamanhos e velocidades orbitais.
 
 ## Elementos das atividades práticas
 
@@ -80,7 +82,7 @@ TBD
 TBD
 
 #### Lael Gustavo Batista Ribeiro de Lima - 20230021715
-Encarregado da parte de iluminação, sombreamento e input do usuário.
+Responsável pela implementação da iluminação com o Sol como fonte emissora, configuração do modelo de sombreamento (Gouraud), controle interativo da simulação (velocidade e câmera), além do desenvolvimento do sistema de anéis planetários com suporte a orientação arbitrária, transparência e mapeamento de textura radial.
 
 #### Matheus Lobato Hora Macedo - 20220137889 
 TBD

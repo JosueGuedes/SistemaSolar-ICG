@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 GLuint texturaCeu;
 GLuint texturaMercurio;
 GLuint texturaVenus;
@@ -12,6 +17,8 @@ GLuint texturaSaturno;
 GLuint texturaUrano;
 GLuint texturaNetuno;
 GLuint texturaSol;
+GLuint texturaSatAnel;
+GLuint texturaUraAnel;
 
 // Variaveis para translação de cubos
 static float angulo = 0.0f;
@@ -34,6 +41,21 @@ typedef struct
 
 typedef struct
 {
+    float raioInterno;
+    float raioExterno;
+
+    float rotX;
+    float rotY;
+    float rotZ;
+
+    // transparência
+    float alpha;
+
+    GLuint textura;
+} Anel;
+
+typedef struct
+{
     Vec3 *orbita;
     int nOrbita;
     char *nome;
@@ -42,6 +64,8 @@ typedef struct
     float t, scale, velocidade;
     GLuint textura;
     float rotX, rotY, rotZ;
+
+    Anel *anel;
 } Planeta;
 
 Planeta planetas[8];
@@ -195,6 +219,7 @@ void initPlanets()
     mercurio.scale = 1.0f;
     mercurio.t = t1;
     mercurio.velocidade = 0.003f;
+    mercurio.anel = NULL;
 
     // Venus
     Planeta venus;
@@ -207,6 +232,7 @@ void initPlanets()
     venus.scale = 0.5;
     venus.t = t2;
     venus.velocidade = 0.002f;
+    venus.anel = NULL;
 
     // Terra
     Planeta terra;
@@ -219,6 +245,7 @@ void initPlanets()
     terra.scale = 0.6;
     terra.t = t3;
     terra.velocidade = 0.0015f;
+    terra.anel = NULL;
 
     // Marte
     Planeta marte;
@@ -231,6 +258,7 @@ void initPlanets()
     marte.scale = 0.45;
     marte.t = t4;
     marte.velocidade = 0.0012f;
+    marte.anel = NULL;
 
     // jupiter
     Planeta jupiter;
@@ -243,6 +271,7 @@ void initPlanets()
     jupiter.scale = 0.9;
     jupiter.t = t5;
     jupiter.velocidade = 0.0008f;
+    jupiter.anel = NULL;
 
     // Saturno
     Planeta saturno;
@@ -256,6 +285,15 @@ void initPlanets()
     saturno.t = t6;
     saturno.velocidade = 0.0006f;
 
+    saturno.anel = (Anel *)malloc(sizeof(Anel));
+    saturno.anel->raioInterno = 1.4f;
+    saturno.anel->raioExterno = 2.5f;
+    saturno.anel->rotX = 15.0f;
+    saturno.anel->rotY = 0.0f;
+    saturno.anel->rotZ = 0.0f;
+    saturno.anel->alpha = 0.7f;
+    saturno.anel->textura = 0;
+
     // Urano
     Planeta urano;
     urano.nome = "Urano";
@@ -267,6 +305,14 @@ void initPlanets()
     urano.scale = 0.8;
     urano.t = t7;
     urano.velocidade = 0.0004f;
+    urano.anel = (Anel *)malloc(sizeof(Anel));
+    urano.anel->raioInterno = 1.2f;
+    urano.anel->raioExterno = 2.0f;
+    urano.anel->rotX = 0.0f;
+    urano.anel->rotY = 90.0f;
+    urano.anel->rotZ = 0.0f;
+    urano.anel->alpha = 0.5f;
+    urano.anel->textura = 0;
 
     // Netuno
     Planeta netuno;
@@ -279,6 +325,7 @@ void initPlanets()
     netuno.scale = 0.7;
     netuno.t = t8;
     netuno.velocidade = 0.0003f;
+    netuno.anel = NULL;
 
     // Adicionando Texturas
     mercurio.textura = 0;
@@ -364,6 +411,71 @@ void drawLabel3D(Vec3 pos, const char *nome)
     glMatrixMode(GL_MODELVIEW);
 }
 
+void drawRing(Planeta planet)
+{
+    int slices = 100;
+
+    float inner = planet.anel->raioInterno;
+    float outer = planet.anel->raioExterno;
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, planet.anel->textura);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+
+    glDisable(GL_CULL_FACE);
+
+    glColor4f(1.0f, 1.0f, 1.0f, planet.anel->alpha);
+
+    glPushMatrix();
+
+    glRotatef(planet.anel->rotX, 1, 0, 0);
+    glRotatef(planet.anel->rotY, 0, 1, 0);
+    glRotatef(planet.anel->rotZ, 0, 0, 1);
+
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+
+    for (int i = 0; i < slices; i++)
+    {
+        float theta1 = (2.0f * M_PI * i) / slices;
+        float theta2 = (2.0f * M_PI * (i + 1)) / slices;
+
+        glBegin(GL_TRIANGLE_STRIP);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        for (int j = 0; j <= 1; j++)
+        {
+            float r = (j == 0) ? inner : outer;
+
+            // NORMALIZAÇÃO RADIAL
+            float t = (r - inner) / (outer - inner);
+
+            float x1 = r * cos(theta1);
+            float z1 = r * sin(theta1);
+
+            float x2 = r * cos(theta2);
+            float z2 = r * sin(theta2);
+
+            glTexCoord2f(t, 0.0f);
+            glVertex3f(x1, 0.0f, z1);
+
+            glTexCoord2f(t, 1.0f);
+            glVertex3f(x2, 0.0f, z2);
+        }
+
+        glEnd();
+    }
+
+    glPopMatrix();
+
+    glEnable(GL_CULL_FACE);
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+}
+
 void renderPlanet(Planeta planet)
 {
     Vec3 pos1 = getSplinePoint(planet.orbita, planet.nOrbita, planet.t);
@@ -393,6 +505,9 @@ void renderPlanet(Planeta planet)
 
         glDisable(GL_TEXTURE_2D);
         gluDeleteQuadric(quad);
+
+        if (planet.anel != NULL)
+            drawRing(planet);
     }
     else
     {
@@ -541,6 +656,8 @@ void init(void)
     texturaSaturno = carregarTexturaPPM("saturn.ppm");
     texturaUrano = carregarTexturaPPM("uranus.ppm");
     texturaNetuno = carregarTexturaPPM("neptune.ppm");
+    texturaSatAnel = carregarTexturaPPM("saturn_ring.ppm");
+    texturaUraAnel = carregarTexturaPPM("uranus_ring.ppm");
 
     planetas[0].textura = texturaMercurio;
     planetas[1].textura = texturaVenus;
@@ -550,6 +667,9 @@ void init(void)
     planetas[5].textura = texturaSaturno;
     planetas[6].textura = texturaUrano;
     planetas[7].textura = texturaNetuno;
+
+    planetas[5].anel->textura = texturaSatAnel;
+    planetas[6].anel->textura = texturaUraAnel;
 
     texturaSol = carregarTexturaPPM("sun.ppm");
 
@@ -574,6 +694,10 @@ void init(void)
         printf("Erro ao carregar uranus.ppm\n");
     if (texturaNetuno == 0)
         printf("Erro ao carregar neptune.ppm\n");
+    if (texturaSatAnel == 0)
+        printf("Erro ao carregar saturn_ring.ppm\n");
+    if (texturaUraAnel == 0)
+        printf("Erro ao carregar uranus_ring.ppm\n");
 }
 
 void display(void)
