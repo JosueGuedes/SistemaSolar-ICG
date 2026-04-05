@@ -8,7 +8,7 @@ A cena inclui iluminação, aplicação de texturas e controle de câmera em tem
 
 ## Demonstração
 
-![Screenshot do sistema solar simulado](PRINT_SISTEMA_SOLAR.png)
+![Screenshot do sistema solar simulado](PRINT_FINAL.png)
 
 ## Compilação e execução
 
@@ -43,11 +43,16 @@ solar_system.exe
 
 O projeto explora diversos conceitos fundamentais de computação gráfica. Foram utilizadas transformações geométricas como translação, rotação e escala para posicionamento e animação dos planetas. A visualização é realizada por meio de projeção em perspectiva com a função `gluPerspective`, e a câmera é controlada utilizando `gluLookAt`.
 
-A iluminação é baseada no modelo padrão do pipeline fixo do OpenGL, com o Sol definido como uma fonte de luz pontual. As superfícies dos planetas utilizam texturas carregadas a partir de arquivos no formato PPM. O movimento orbital é implementado com interpolação por curvas, garantindo trajetórias suaves ao longo do tempo.
+A iluminação é baseada no modelo padrão do pipeline fixo do OpenGL, com o Sol definido como uma fonte de luz pontual. As superfícies dos planetas utilizam texturas carregadas a partir de arquivos no formato PPM, com aplicação em superfícies esféricas, incluindo ajustes de rotação para correto alinhamento nos eixos. Além disso, foi implementado um fundo estrelado utilizando uma esfera de grande escala com textura aplicada internamente, simulando o ambiente espacial ao redor do sistema solar. 
+
+O movimento orbital é implementado com interpolação por curvas, garantindo trajetórias suaves ao longo do tempo.
 
 ## Problemas encontrados
 
-TBD
+TEXTURA 
+
+Durante o desenvolvimento, um dos principais problemas encontrados foi o alinhamento incorreto da textura da Terra, que inicialmente aparecia “torta” em relação ao eixo do planeta. Esse comportamento ocorreu devido à orientação padrão do mapeamento de textura em esferas (GLUquadric), que nem sempre coincide com a orientação esperada da imagem utilizada.
+Para contornar esse problema, foi necessário realizar ajustes de rotação no objeto, alinhando corretamente a textura com os eixos do modelo. Esse processo exigiu testes iterativos até encontrar a orientação adequada, evidenciando a importância do controle de transformações na etapa de texturização.
 
 ## Possíveis melhorias
 
@@ -71,7 +76,11 @@ Neste projeto, a iluminação foi implementada utilizando o pipeline fixo do Ope
 O sombreamento é controlado pelo modelo GL_SMOOTH, que utiliza interpolação de cores entre os vértices das superfícies, caracterizando o método de Gouraud shading. As normais das superfícies esféricas são calculadas automaticamente pelas primitivas da GLU, permitindo uma transição suave entre áreas iluminadas e não iluminadas.
 
 ### Mapeamento de texturas
-TBD
+Neste projeto, a texturização foi implementada utilizando o pipeline fixo do OpenGL, com aplicação de imagens sobre superfícies geométricas para representar os corpos celestes. As texturas são carregadas a partir de arquivos no formato PPM (P6) por meio de uma função própria, que realiza a leitura dos dados RGB e os envia para a GPU utilizando glTexImage2D, além de configurar parâmetros como interpolação linear e repetição.
+
+As superfícies esféricas dos planetas e do Sol utilizam GLUquadric com mapeamento automático de textura, permitindo que as imagens sejam distribuídas corretamente ao longo da geometria. O céu é representado por uma esfera invertida texturizada, criando o efeito de fundo espacial.
+
+Além disso, os anéis de Saturno e Urano são renderizados manualmente com GL_TRIANGLE_STRIP, utilizando coordenadas de textura parametrizadas e transparência, o que permite simular estruturas finas e translúcidas. No caso do Sol, a textura é combinada com emissão de luz, garantindo que sua aparência seja independente da iluminação da cena.
 
 ### Curvas paramétricas
 TBD
@@ -85,4 +94,4 @@ TBD
 Responsável pela implementação da iluminação com o Sol como fonte emissora, configuração do modelo de sombreamento (Gouraud), controle interativo da simulação (velocidade e câmera), além do desenvolvimento do sistema de anéis planetários com suporte a orientação arbitrária, transparência e mapeamento de textura radial.
 
 #### Matheus Lobato Hora Macedo - 20220137889 
-TBD
+Responsável pela implementação da texturização dos planetas e do Sol. Também realizou ajustes de rotação nas texturas para garantir o alinhamento correto nos eixos dos objetos. Além disso, desenvolveu o fundo estrelado da cena utilizando uma esfera de grande escala que engloba todo o sistema solar, com textura aplicada internamente para simular o ambiente espacial.
