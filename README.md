@@ -66,10 +66,10 @@ Adicionalmente, pode-se aprimorar a interação com o usuário por meio de contr
 ## Elementos das atividades práticas
 
 ### Visualização
-TBD
+Os astros são renderizados dinamicamente por intermédio da função renderPlanet(), que resgata as informações da variável global planetas.
 
 ### Visibilidade
-TBD
+A visibilidade no projeto é implementada através da câmera, inicialmente distante e focada no Sol, que é móvel por meio das interações do teclado, podendo explorar novos ângulos da câmera.
 
 ### Iluminação e Sombreamento
 Neste projeto, a iluminação foi implementada utilizando o pipeline fixo do OpenGL, com uma fonte de luz pontual posicionada na origem da cena, representando o Sol. Essa luz afeta todos os planetas, que são renderizados com materiais que respondem aos componentes ambiente, difuso e especular da iluminação. O Sol, por sua vez, utiliza emissão própria, de modo que sua aparência não depende da luz da cena, simulando um corpo luminoso.
@@ -84,12 +84,22 @@ As superfícies esféricas dos planetas e do Sol utilizam GLUquadric com mapeame
 Além disso, os anéis de Saturno e Urano são renderizados manualmente com GL_TRIANGLE_STRIP, utilizando coordenadas de textura parametrizadas e transparência, o que permite simular estruturas finas e translúcidas. No caso do Sol, a textura é combinada com emissão de luz, garantindo que sua aparência seja independente da iluminação da cena.
 
 ### Curvas paramétricas
-TBD
+A movimentação dos astros foi implementada por intermédio do uso de uma spline cíclica de Catmull-Rom, utilizando oito pontos para garantir uma maior suavidade na movimentação. Cada planeta possui uma curva própria, atributo do struct Planeta, indicando a sua curva, aumentando progressivamente para cada astro. A posição dos planetas é calculada dinamicamente utilizando da função catmullRom(), que implementa a fórmula utilizada.
+
+Os oito pontos representam, respectivamente: 
+1. Direita (extremo da elipse)
+2. Canto superior direito
+3. Topo
+4. Canto superior esquerdo
+5. Esquerda (extremo)
+6. Canto inferior esquerdo
+7. Baixo
+8. Canto inferior direito
 
 ## Integrantes do grupo
 
 #### Josué Guedes Ferreira - 20230012313
-TBD
+Responsável pela implementação da movimentação dos planetas por meio das curvas paramétricas, renderização inicial dos planetas, coordenação do grupo e configuração inicial da câmera, além da criação das estruturas de dados básicas do projeto como Planeta.
 
 #### Lael Gustavo Batista Ribeiro de Lima - 20230021715
 Responsável pela implementação da iluminação com o Sol como fonte emissora, configuração do modelo de sombreamento (Gouraud), controle interativo da simulação (velocidade e câmera), além do desenvolvimento do sistema de anéis planetários com suporte a orientação arbitrária, transparência e mapeamento de textura radial.
