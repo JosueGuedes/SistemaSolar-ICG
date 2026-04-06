@@ -53,6 +53,7 @@ TEXTURA
 
 Durante o desenvolvimento, um dos principais problemas encontrados foi o alinhamento incorreto da textura da Terra, que inicialmente aparecia “torta” em relação ao eixo do planeta. Esse comportamento ocorreu devido à orientação padrão do mapeamento de textura em esferas (GLUquadric), que nem sempre coincide com a orientação esperada da imagem utilizada.
 Para contornar esse problema, foi necessário realizar ajustes de rotação no objeto, alinhando corretamente a textura com os eixos do modelo. Esse processo exigiu testes iterativos até encontrar a orientação adequada, evidenciando a importância do controle de transformações na etapa de texturização.
+Um problema similar foi encontrado ao mapear a textura dos anéis de Saturno e Urano, os quais aparentavam ser estriadas de forma paralela. Os anéis precisaram ter as suas texturas mapeadas de uma imagem retangular ao formato de disco desejado e esticados para fazer a volta completa com listras radiais.
 
 ## Possíveis melhorias
 
